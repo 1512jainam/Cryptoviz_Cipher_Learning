@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CryptoViz - Interactive Cipher Learning</title>
+    <meta name="description" content="Learn cryptography through interactive visualizations" />
+    <meta name="author" content="CryptoViz" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'mono': ['JetBrains Mono', 'monospace'],
+              'sans': ['Inter', 'sans-serif'],
+            },
+            colors: {
+              'cyber-blue': '#00d4ff',
+              'cyber-purple': '#8b5cf6',
+              'cyber-green': '#10b981',
+              'cyber-orange': '#f59e0b',
+              'dark-bg': '#0f0f23',
+              'dark-card': '#1a1a2e',
+              'dark-border': '#16213e',
+            },
+            animation: {
+              'pulse-slow': 'pulse 3s ease-in-out infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'glow': 'glow 2s ease-in-out infinite alternate',
+              'slide-up': 'slide-up 0.5s ease-out',
+              'encrypt': 'encrypt 2s ease-in-out',
+              'binary-rain': 'binary-rain 15s linear infinite',
+              'typewriter': 'typewriter 4s steps(40) infinite',
+              'fade-in': 'fadeIn 0.8s ease-out',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-20px)' },
+              },
+              glow: {
+                '0%': { boxShadow: '0 0 20px rgba(0, 212, 255, 0.3)' },
+                '100%': { boxShadow: '0 0 40px rgba(0, 212, 255, 0.8)' },
+              },
+              'slide-up': {
+                '0%': { transform: 'translateY(100%)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+              encrypt: {
+                '0%': { transform: 'scale(1) rotate(0deg)', filter: 'blur(0px)' },
+                '50%': { transform: 'scale(1.1) rotate(180deg)', filter: 'blur(2px)' },
+                '100%': { transform: 'scale(1) rotate(360deg)', filter: 'blur(0px)' },
+              },
+              'binary-rain': {
+                '0%': { transform: 'translateY(-100vh)', opacity: '0' },
+                '10%': { opacity: '1' },
+                '90%': { opacity: '1' },
+                '100%': { transform: 'translateY(100vh)', opacity: '0' },
+              },
+              typewriter: {
+                '0%': { width: '0' },
+                '50%': { width: '100%' },
+                '100%': { width: '0' },
+              },
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(30px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      .cyber-btn-blue {
+        background: linear-gradient(90deg, rgb(18, 176, 211) 0%, rgb(18, 114, 134) 100%);
+        color: #fff !important;
+        border: none;
+        box-shadow: 0 2px 12px 0 rgb(3, 197, 236);
+        transition: all 0.3s ease;
+      }
+      .cyber-btn-blue:hover {
+        background: linear-gradient(90deg, #00d4ff 0%, rgb(9, 28, 42) 100%);
+        box-shadow: 0 4px 24px 0 #00d4ff55;
+        transform: scale(1.05);
+      }
+      
+      .cyber-btn-purple {
+        background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+        color: #fff !important;
+        border: none;
+        box-shadow: 0 2px 12px 0 #8b5cf633;
+        transition: all 0.3s ease;
+      }
+      .cyber-btn-purple:hover {
+        background: linear-gradient(90deg, #7c3aed 0%, #8b5cf6 100%);
+        box-shadow: 0 4px 24px 0 #8b5cf655;
+        transform: scale(1.05);
+      }
+
+      .binary-column {
+        position: absolute;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #00d4ff;
+        opacity: 0.15;
+        white-space: pre-line;
+        animation: binary-rain 15s linear infinite;
+      }
+
+      .cipher-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        width: 100%;
+        max-width: 320px;
+        min-height: 240px;
+      }
+
+      .cipher-card:hover {
+        transform: translateY(-8px) scale(1.02);
+      }
+
+      .cipher-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        justify-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .cipher-card-inner {
+        height: 100%;
+        min-height: 240px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.5rem;
+        overflow: hidden;
+      }
+
+      .cipher-card-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .cipher-card-description {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        margin: 1rem 0;
+      }
+
+      .cipher-card-footer {
+        margin-top: auto;
+        padding-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body class="bg-dark-bg text-white font-sans overflow-x-hidden">
+    
+    <div class="fixed inset-0 pointer-events-none opacity-10 z-0" id="binary-bg"></div>
+    
+    <nav class="bg-dark-card/80 backdrop-blur-sm p-4 flex gap-6 fixed top-0 w-full z-50 border-b border-dark-border">
+      <a href="#" class="text-cyber-blue font-medium hover:text-white transition-colors duration-300">Home</a>
+      <a href="caesar.html" class="text-gray-400 hover:text-cyber-blue transition-colors duration-300">Caesar Cipher</a>
+      <a href="vigenere.html" class="text-gray-400 hover:text-cyber-blue transition-colors duration-300">Vigenère Cipher</a>
+      <a href="railfence.html" class="text-gray-400 hover:text-cyber-blue transition-colors duration-300">Rail Fence</a>
+      <a href="affine.html" class="text-gray-400 hover:text-cyber-blue transition-colors duration-300">Affine Cipher</a>
+      <a href="columnar.html" class="text-gray-400 hover:text-cyber-blue transition-colors duration-300">Columnar Transposition</a>
+      <a href="playfair.html" class="text-gray-400 hover:text-cyber-blue transition-colors duration-300">Playfair Cipher</a>
+      <a href="monoalphabetic.html" class="text-gray-400 hover:text-cyber-blue transition-colors duration-300">Monoalphabetic</a>
+      <a href="Atbash.html" class="text-gray-400 hover:text-cyber-blue transition-colors duration-300">Atbash</a>
+    </nav>
+
+    <main class="pt-16 relative z-10">
+      <section class="min-h-screen flex items-center justify-center px-6 relative">
+        <div class="text-center max-w-6xl mx-auto">
+          <div class="mb-8">
+            <h1 class="text-7xl md:text-9xl font-bold mb-6">
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-blue via-cyber-purple to-cyber-green animate-glow">
+                CryptoViz
+              </span>
+            </h1>
+            <div class="text-xl md:text-2xl text-gray-300 mb-8 font-mono">
+              <span id="typewriter-text" class="border-r-2 border-cyber-blue animate-pulse">Decoding the secrets of cryptography...</span>
+            </div>
+          </div>
+          
+          <p class="text-lg md:text-xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
+            Master the art of encryption through interactive visualizations. Explore classical ciphers, 
+            understand their mechanics, and witness the evolution of cryptographic techniques.
+          </p>
+
+          <div class="bg-dark-card/60 backdrop-blur-sm p-8 rounded-2xl border border-dark-border mb-12 animate-slide-up">
+            <h3 class="text-2xl font-bold text-cyber-blue mb-6 font-mono">Try It Live</h3>
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Enter your message:</label>
+                <input 
+                  type="text" 
+                  id="demo-input" 
+                  placeholder="Hello World!" 
+                  class="w-full p-3 bg-dark-bg border border-dark-border rounded-lg text-white font-mono focus:border-cyber-blue focus:outline-none transition-colors"
+                  value="Hello World!"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Caesar Cipher (Shift: 3):</label>
+                <div id="demo-output" class="w-full p-3 bg-dark-bg border border-dark-border rounded-lg text-cyber-green font-mono">
+                  KHOOR ZRUOG!
+                </div>
+              </div>
+            </div>
+            <button 
+              onclick="encryptDemo()" 
+              class="mt-4 px-6 py-3 cyber-btn-blue text-white font-medium rounded-lg font-mono"
+            >
+              Encrypt Message
+            </button>
+          </div>
+
+          <div class="flex gap-4 justify-center">
+            <button onclick="scrollToCiphers()" class="px-8 py-4 cyber-btn-blue text-white font-semibold rounded-xl font-mono">
+              Explore Ciphers
+            </button>
+            <button onclick="scrollToAbout()" class="px-8 py-4 border-2 border-cyber-blue text-cyber-blue font-semibold rounded-xl hover:bg-cyber-blue hover:text-dark-bg transition-all duration-300 font-mono">
+              Learn More
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="ciphers" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+          <h2 class="text-5xl font-bold text-center mb-16 font-mono">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-green to-cyber-blue">
+              Cipher Collection
+            </span>
+          </h2>
+          
+          <div class="mb-16">
+            <h3 class="text-3xl font-bold text-cyber-blue mb-8 text-center font-mono">Substitution Ciphers</h3>
+            <div class="cipher-grid">
+              
+              <div class="cipher-card" data-href="caesar.html">
+                <div class="bg-dark-card/80 backdrop-blur-sm rounded-2xl border border-dark-border hover:border-cyber-blue transition-all duration-300 hover:shadow-xl hover:shadow-cyber-blue/20 cipher-card-inner">
+                  <div class="cipher-card-content">
+                    <div>
+                      <div class="text-4xl mb-4 text-cyber-blue">🔤</div>
+                      <h4 class="text-2xl font-bold mb-3 text-cyber-blue font-mono">Caesar Cipher</h4>
+                    </div>
+                    <div class="cipher-card-description">
+                      <p class="text-gray-400 text-sm leading-relaxed">The classic shift cipher used by Julius Caesar. Simple yet effective for understanding basic encryption.</p>
+                    </div>
+                    <div class="cipher-card-footer">
+                      <div class="font-mono text-sm text-cyber-green mb-2">A → D (shift: 3)</div>
+                      <span class="text-xs text-gray-500 font-mono">SUBSTITUTION</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cipher-card" data-href="vigenere.html">
+                <div class="bg-dark-card/80 backdrop-blur-sm rounded-2xl border border-dark-border hover:border-cyber-purple transition-all duration-300 hover:shadow-xl hover:shadow-cyber-purple/20 cipher-card-inner">
+                  <div class="cipher-card-content">
+                    <div>
+                      <div class="text-4xl mb-4 text-cyber-purple">🔑</div>
+                      <h4 class="text-2xl font-bold mb-3 text-cyber-purple font-mono">Vigenère Cipher</h4>
+                    </div>
+                    <div class="cipher-card-description">
+                      <p class="text-gray-400 text-sm leading-relaxed">The "unbreakable" cipher that uses a keyword to create multiple Caesar shifts.</p>
+                    </div>
+                    <div class="cipher-card-footer">
+                      <div class="font-mono text-sm text-cyber-green mb-2">KEY: CRYPTO</div>
+                      <span class="text-xs text-gray-500 font-mono">SUBSTITUTION</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cipher-card" data-href="affine.html">
+                <div class="bg-dark-card/80 backdrop-blur-sm rounded-2xl border border-dark-border hover:border-cyber-orange transition-all duration-300 hover:shadow-xl hover:shadow-cyber-orange/20 cipher-card-inner">
+                  <div class="cipher-card-content">
+                    <div>
+                      <div class="text-4xl mb-4 text-cyber-orange">📊</div>
+                      <h4 class="text-2xl font-bold mb-3 text-cyber-orange font-mono">Affine Cipher</h4>
+                    </div>
+                    <div class="cipher-card-description">
+                      <p class="text-gray-400 text-sm leading-relaxed">Mathematical cipher using modular arithmetic with multiplication and addition.</p>
+                    </div>
+                    <div class="cipher-card-footer">
+                      <div class="font-mono text-sm text-cyber-green mb-2">E(x) = (ax + b) mod 26</div>
+                      <span class="text-xs text-gray-500 font-mono">SUBSTITUTION</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cipher-card" data-href="playfair.html">
+                <div class="bg-dark-card/80 backdrop-blur-sm rounded-2xl border border-dark-border hover:border-cyber-purple transition-all duration-300 hover:shadow-xl hover:shadow-cyber-purple/20 cipher-card-inner">
+                  <div class="cipher-card-content">
+                    <div>
+                      <div class="text-4xl mb-4 text-cyber-purple">🎯</div>
+                      <h4 class="text-2xl font-bold mb-3 text-cyber-purple font-mono">Playfair Cipher</h4>
+                    </div>
+                    <div class="cipher-card-description">
+                      <p class="text-gray-400 text-sm leading-relaxed">A digraph substitution cipher using a 5×5 grid of letters based on a keyword.</p>
+                    </div>
+                    <div class="cipher-card-footer">
+                      <div class="font-mono text-sm text-cyber-green mb-2">5×5 Grid</div>
+                      <span class="text-xs text-gray-500 font-mono">SUBSTITUTION</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cipher-card" data-href="monoalphabetic.html">
+                <div class="bg-dark-card/80 backdrop-blur-sm rounded-2xl border border-dark-border hover:border-cyan-400 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-400/20 cipher-card-inner">
+                  <div class="cipher-card-content">
+                    <div>
+                      <div class="text-4xl mb-4 text-cyan-400">🎲</div>
+                      <h4 class="text-2xl font-bold mb-3 text-cyan-400 font-mono">Monoalphabetic</h4>
+                    </div>
+                    <div class="cipher-card-description">
+                      <p class="text-gray-400 text-sm leading-relaxed">Random substitution cipher where each letter maps to another unique letter.</p>
+                    </div>
+                    <div class="cipher-card-footer">
+                      <div class="font-mono text-sm text-cyber-green mb-2">A→Q, B→W, C→E...</div>
+                      <span class="text-xs text-gray-500 font-mono">SUBSTITUTION</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cipher-card" data-href="Atbash.html">
+                <div class="bg-dark-card/80 backdrop-blur-sm rounded-2xl border border-dark-border hover:border-pink-400 transition-all duration-300 hover:shadow-xl hover:shadow-pink-400/20 cipher-card-inner">
+                  <div class="cipher-card-content">
+                    <div>
+                      <div class="text-4xl mb-4 text-pink-400">🔄</div>
+                      <h4 class="text-2xl font-bold mb-3 text-pink-400 font-mono">Atbash Cipher</h4>
+                    </div>
+                    <div class="cipher-card-description">
+                      <p class="text-gray-400 text-sm leading-relaxed">Ancient Hebrew cipher that reverses the alphabet. A becomes Z, B becomes Y.</p>
+                    </div>
+                    <div class="cipher-card-footer">
+                      <div class="font-mono text-sm text-cyber-green mb-2">A→Z, B→Y, C→X</div>
+                      <span class="text-xs text-gray-500 font-mono">SUBSTITUTION</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-3xl font-bold text-cyber-green mb-8 text-center font-mono">Transposition Ciphers</h3>
+            <div class="cipher-grid">
+              
+              <div class="cipher-card" data-href="railfence.html">
+                <div class="bg-dark-card/80 backdrop-blur-sm rounded-2xl border border-dark-border hover:border-cyber-green transition-all duration-300 hover:shadow-xl hover:shadow-cyber-green/20 cipher-card-inner">
+                  <div class="cipher-card-content">
+                    <div>
+                      <div class="text-4xl mb-4 text-cyber-green">🚂</div>
+                      <h4 class="text-2xl font-bold mb-3 text-cyber-green font-mono">Rail Fence Cipher</h4>
+                    </div>
+                    <div class="cipher-card-description">
+                      <p class="text-gray-400 text-sm leading-relaxed">A transposition cipher that writes text in a zigzag pattern across multiple rails.</p>
+                    </div>
+                    <div class="cipher-card-footer">
+                      <div class="font-mono text-sm text-cyber-green mb-2">Rails: 3</div>
+                      <span class="text-xs text-gray-500 font-mono">TRANSPOSITION</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cipher-card" data-href="columnar.html">
+                <div class="bg-dark-card/80 backdrop-blur-sm rounded-2xl border border-dark-border hover:border-cyber-blue transition-all duration-300 hover:shadow-xl hover:shadow-cyber-blue/20 cipher-card-inner">
+                  <div class="cipher-card-content">
+                    <div>
+                      <div class="text-4xl mb-4 text-cyber-blue">📋</div>
+                      <h4 class="text-2xl font-bold mb-3 text-cyber-blue font-mono">Columnar Transposition</h4>
+                    </div>
+                    <div class="cipher-card-description">
+                      <p class="text-gray-400 text-sm leading-relaxed">Rearrange text by writing in columns and reading with a specific key order.</p>
+                    </div>
+                    <div class="cipher-card-footer">
+                      <div class="font-mono text-sm text-cyber-green mb-2">KEY: 3142</div>
+                      <span class="text-xs text-gray-500 font-mono">TRANSPOSITION</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="py-20 px-6 bg-dark-card/30">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="text-5xl font-bold text-center mb-16 font-mono">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-orange to-cyber-purple">
+              Why CryptoViz?
+            </span>
+          </h2>
+          
+          <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center p-6 bg-dark-bg border border-dark-border rounded-2xl">
+              <div class="text-6xl mb-6 text-cyber-blue animate-float">🎨</div>
+              <h3 class="text-2xl font-bold mb-4 text-cyber-blue font-mono">Visual Learning</h3>
+              <p class="text-gray-400 leading-relaxed">See how ciphers work through interactive animations and step-by-step visualizations.</p>
+            </div>
+            
+            <div class="text-center p-6 bg-dark-bg border border-dark-border rounded-2xl">
+              <div class="text-6xl mb-6 text-cyber-green animate-float" style="animation-delay: 2s;">⚡</div>
+              <h3 class="text-2xl font-bold mb-4 text-cyber-green font-mono">Hands-on Practice</h3>
+              <p class="text-gray-400 leading-relaxed">Encrypt and decrypt your own messages to understand each cipher's unique characteristics.</p>
+            </div>
+            
+            <div class="text-center p-6 bg-dark-bg border border-dark-border rounded-2xl">
+              <div class="text-6xl mb-6 text-cyber-purple animate-float" style="animation-delay: 4s;">🧠</div>
+              <h3 class="text-2xl font-bold mb-4 text-cyber-purple font-mono">Deep Understanding</h3>
+              <p class="text-gray-400 leading-relaxed">Learn the history, mathematics, and cryptanalysis techniques behind each cipher.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-dark-card/80 backdrop-blur-sm py-12 px-6 border-t border-dark-border">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="text-3xl font-bold text-cyber-blue mb-4 font-mono">CryptoViz</div>
+        <p class="text-gray-400 mb-6">Unlocking the mysteries of cryptography through interactive learning</p>
+        <div class="text-sm text-gray-500">
+          Made with 💙 for cryptography enthusiasts
+        </div>
+      </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+  </body>
+</html>
