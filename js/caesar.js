@@ -338,7 +338,6 @@ Result: KHOOR</pre>
                 result += char; 
             }
         }
-        
         return result;
     }
     
@@ -355,7 +354,7 @@ Result: KHOOR</pre>
         const shiftedAlphabet = alphabet.split('').map(char => {
             const charCode = char.charCodeAt(0);
             const shiftedCode = ((charCode - 65 + shift) % 26) + 65;
-            return String.fromCharCode(shiftedCode);
+            return String.fromCharCode(shiftedCode); 
         }).join('');
         
         let html = '';

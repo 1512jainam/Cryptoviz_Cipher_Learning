@@ -224,10 +224,10 @@ class ColumnarPage {
         <h2 class="text-xl font-bold mb-2 text-cyber-blue font-['JetBrains_Mono','Inter',monospace]">Cipher Principle</h2>
         <p class="mb-2">The <b>Columnar Transposition Cipher</b> rearranges the plaintext by writing it in a grid and reading it column by column in a specific order determined by the key.</p>
         <p class="mb-2"><b>Example:</b> With key <span class="font-mono text-cyber-green">CRYPTO</span> and message <span class="font-mono text-cyber-orange">HELLO WORLD</span>:</p>
-        <pre class="bg-dark-bg p-2 rounded mb-2 font-mono text-base text-cyber-green">Key order: C(2) R(4) Y(6) P(3) T(5) O(1)
-Grid:      H E L L O
-           W O R L D
-Read by:   O O | H W | L L | E O | T D | Y</pre>
+        <pre class="bg-dark-bg p-2 rounded mb-2 font-mono text-base text-cyber-green">Key order: C(1) R(4) Y(6) P(3) T(5) O(2)
+Grid:      H E L L O W
+           O R L D X X
+Read by:   H O | W X | L D | E R | O X | L L </pre>
         <p>Characters are arranged in columns under the key, then read column by column in alphabetical order of the key letters.</p>
       </div>
     </div>
@@ -250,8 +250,20 @@ Read by:   O O | H W | L L | E O | T D | Y</pre>
 
     getColumnOrder(key) {
         const keyChars = key.toUpperCase().split('');
-        const sorted = [...keyChars].sort();
-        return keyChars.map(char => sorted.indexOf(char) + 1);
+        const indexed = keyChars.map((char, index) => ({ char, index }));
+        indexed.sort((a, b) => {
+            if (a.char === b.char) {
+                return a.index - b.index;
+            }
+            return a.char.localeCompare(b.char);
+        });
+        
+        const order = new Array(keyChars.length);
+        for (let i = 0; i < indexed.length; i++) {
+            order[indexed[i].index] = i + 1;
+        }
+        
+        return order;
     }
     
 
@@ -262,34 +274,34 @@ Read by:   O O | H W | L L | E O | T D | Y</pre>
         const processedKey = caseSensitive ? key : key.toUpperCase();
         const keyLength = processedKey.length;
         
-
-        const rows = Math.ceil(processedText.length / keyLength);
-        const grid = Array(rows).fill(null).map(() => Array(keyLength).fill(''));
-        
-
-        for (let i = 0; i < processedText.length; i++) {
-            const row = Math.floor(i / keyLength);
-            const col = i % keyLength;
-            grid[row][col] = processedText[i];
+        let paddedText = processedText;
+        const remainder = paddedText.length % keyLength;
+        if (remainder !== 0) {
+            const padding = keyLength - remainder;
+            paddedText += 'X'.repeat(padding);
         }
         
-
-        const columnOrder = this.getColumnOrder(processedKey);
+        const rows = paddedText.length / keyLength;
+        const grid = Array(rows).fill(null).map(() => Array(keyLength).fill(''));
         
-
+        for (let i = 0; i < paddedText.length; i++) {
+            const row = Math.floor(i / keyLength);
+            const col = i % keyLength;
+            grid[row][col] = paddedText[i];
+        }
+        
+        const columnOrder = this.getColumnOrder(processedKey);
         let result = '';
+        
         for (let order = 1; order <= keyLength; order++) {
             const colIndex = columnOrder.indexOf(order);
             for (let row = 0; row < rows; row++) {
-                if (grid[row][colIndex]) {
-                    result += grid[row][colIndex];
-                }
+                result += grid[row][colIndex];
             }
         }
         
         return result;
     }
-
     columnarDecrypt(text, key, preserveSpaces, caseSensitive) {
         if (!key || key.length === 0) return text;
         
@@ -297,7 +309,6 @@ Read by:   O O | H W | L L | E O | T D | Y</pre>
         const keyLength = processedKey.length;
         const rows = Math.ceil(text.length / keyLength);
         
-
         const columnLengths = Array(keyLength).fill(rows);
         const remainder = text.length % keyLength;
         if (remainder !== 0) {
@@ -306,13 +317,9 @@ Read by:   O O | H W | L L | E O | T D | Y</pre>
             }
         }
         
-
         const columnOrder = this.getColumnOrder(processedKey);
-        
-
         const grid = Array(rows).fill(null).map(() => Array(keyLength).fill(''));
         
-
         let textIndex = 0;
         for (let order = 1; order <= keyLength; order++) {
             const colIndex = columnOrder.indexOf(order);
@@ -323,7 +330,6 @@ Read by:   O O | H W | L L | E O | T D | Y</pre>
             }
         }
         
-
         let result = '';
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < keyLength; col++) {
@@ -332,6 +338,8 @@ Read by:   O O | H W | L L | E O | T D | Y</pre>
                 }
             }
         }
+        
+        result = result.replace(/X+$/, '');
         
         return result;
     }
@@ -382,7 +390,13 @@ Read by:   O O | H W | L L | E O | T D | Y</pre>
         }
         
         const keyLength = processedKey.length;
-        const rows = Math.ceil(processedText.length / keyLength);
+        let paddedText = processedText;
+        const remainder = paddedText.length % keyLength;
+        if (remainder !== 0) {
+            const padding = keyLength - remainder;
+            paddedText += 'X'.repeat(padding);
+        }
+        const rows = paddedText.length / keyLength;
         const columnOrder = this.getColumnOrder(processedKey);
         
 
@@ -397,7 +411,7 @@ Read by:   O O | H W | L L | E O | T D | Y</pre>
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < keyLength; col++) {
                 const index = row * keyLength + col;
-                const char = index < processedText.length ? processedText[index] : '';
+                const char = index < paddedText.length ? paddedText[index] : '';
                 html += `<div class="columnar-cell data">${char || '·'}</div>`;
             }
         }

@@ -1,34 +1,8 @@
-
 document.addEventListener('DOMContentLoaded', function() {
-    initializeBinaryBackground();
     initializeTypewriter();
     initializeCipherCards();
     initializeDemoFunctionality();
 });
-
-
-function initializeBinaryBackground() {
-    const binaryBg = document.getElementById('binary-bg');
-    if (!binaryBg) return;
-    
-    for (let i = 0; i < 15; i++) {
-        const column = document.createElement('div');
-        column.className = 'binary-column';
-        column.style.left = Math.random() * 100 + '%';
-        column.style.animationDelay = Math.random() * 15 + 's';
-        column.style.animationDuration = (15 + Math.random() * 10) + 's';
-        
-        let binaryText = '';
-        for (let j = 0; j < 50; j++) {
-            binaryText += Math.random() > 0.5 ? '1' : '0';
-            if (j % 8 === 7) binaryText += '\n';
-        }
-        column.textContent = binaryText;
-        
-        binaryBg.appendChild(column);
-    }
-}
-
 
 function initializeTypewriter() {
     const typewriterElement = document.getElementById('typewriter-text');

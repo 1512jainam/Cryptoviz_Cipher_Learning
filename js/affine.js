@@ -360,12 +360,12 @@ Result: RCCXS</pre>
         if (isValid) {
             strengthEl.textContent = 'Valid';
             strengthEl.className = 'key-strength strong';
-            validationEl.textContent = `gcd(${a}, 26) = ${this.gcd(a, 26)} ✓`;
+            validationEl.textContent = `gcd(${a}, 26) = ${this.gcd(a, 26)} `;
         } else {
             strengthEl.textContent = 'Invalid';
             strengthEl.className = 'key-strength weak';
             if (this.gcd(a, 26) !== 1) {
-                validationEl.textContent = `gcd(${a}, 26) = ${this.gcd(a, 26)} ✗ (must be 1)`;
+                validationEl.textContent = `gcd(${a}, 26) = ${this.gcd(a, 26)} X (must be 1)`;
             } else {
                 validationEl.textContent = 'Parameters out of range';
             }
